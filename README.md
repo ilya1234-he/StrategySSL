@@ -1,4 +1,4 @@
-# Strategy Project
+# Strategy Project1
 
 ## 📦 Installation
 
