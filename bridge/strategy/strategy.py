@@ -9,6 +9,7 @@ from bridge import const
 from bridge.auxiliary import aux, fld, rbt  # type: ignore
 from bridge.const import State as GameStates
 from bridge.router.base_actions import Action, Actions, KickActions  # type: ignore
+from bridge.strategy import construction
 
 
 class Strategy:
@@ -81,24 +82,5 @@ class Strategy:
         - actions[9] = Actions.BallGrab(0.0)
                 The robot number 9 grabs the ball at an angle of 0.0 (it looks to the right, along the OX axis)
         """
-        # actions[4] = Actions.GoToPoint(
-        #     (
-        #         (field.ball.get_pos())
-        #         + ((field.ball.get_pos() - (field.enemy_goal.center)).unity() * 100)
-        #     ),
-        #     (field.enemy_goal.center - field.allies[4].get_pos()).arg(),
-        # )
-        if (field.allies[4].get_pos()).mag() < (field.enemy_goal.frw).mag():
-            if field.enemies[2].get_pos().y < 0:
-                actions[4] = Actions.Kick(field.enemy_goal.up - (field.enemy_goal.eye_up * 100))
-            else:
-                actions[4] = Actions.Kick(field.enemy_goal.down - (field.enemy_goal.eye_up * (-100)))
-        else:
-            if (field.allies[4].get_pos().y < 0):
-                actions[4] = Actions.Kick(field.enemy_goal.up - (field.enemy_goal.eye_up * 100) + 
-                                          (field.enemy_goal.eye_forw * (-150)))
-            else:
-                actions[4] = Actions.Kick(field.enemy_goal.down - (field.enemy_goal.eye_up * (-100)) + 
-                                          (field.enemy_goal.eye_forw * (-150)))
-
-
+        if aux.in_place(field.ball.get_pos(), field.ally_goal.center, 2000):
+            construction.defend_goal()
