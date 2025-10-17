@@ -82,5 +82,6 @@ class Strategy:
         - actions[9] = Actions.BallGrab(0.0)
                 The robot number 9 grabs the ball at an angle of 0.0 (it looks to the right, along the OX axis)
         """
-        if aux.in_place(field.ball.get_pos(), field.ally_goal.center, 2000):
-            construction.defend_goal()
+        # if aux.in_place(field.ball.get_pos(), field.ally_goal.center, 3200):
+        #     construction.defend_goal_ally(field, actions)
+        actions[1] = Actions.BallGrab

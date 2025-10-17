@@ -35,6 +35,7 @@ class Image:
     def clear(self) -> None:
         """clear the image"""
         self.data = []
+        self.telemetry = []
 
     def draw_circle(
         self,
