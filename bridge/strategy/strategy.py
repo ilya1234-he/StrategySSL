@@ -82,6 +82,11 @@ class Strategy:
         - actions[9] = Actions.BallGrab(0.0)
                 The robot number 9 grabs the ball at an angle of 0.0 (it looks to the right, along the OX axis)
         """
-        # if aux.in_place(field.ball.get_pos(), field.ally_goal.center, 3200):
-        #     construction.defend_goal_ally(field, actions)
-        actions[1] = Actions.BallGrab
+        if aux.in_place(field.ball.get_pos(), field.ally_goal.center, 3200):
+            # construction.day_pas(field, actions, field.gk_id, field.allies[1].r_id, 1500)
+
+            construction.defend_goal_ally(field, actions)
+        else:
+            actions = [Actions.Stop()] * const.TEAM_ROBOTS_MAX_COUNT
+            actions[field.gk_id] = Actions.GoToPoint(field.ally_goal.center,
+                                                     (field.ball.get_pos() - field.allies[field.gk_id].get_pos()).arg())

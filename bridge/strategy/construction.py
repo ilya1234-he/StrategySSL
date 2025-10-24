@@ -26,10 +26,9 @@ def kick_goal(field: fld.Field, actions: list[Optional[Action]], kicker: int) ->
 
 
 def defend_goal_ally(field: fld.Field, actions: list[Optional[Action]]) -> None:
-    allies_pos = []
     defender = field.gk_id
 
-    if not aux.in_place(field.ball.get_pos(), field.allies[defender].get_pos(), 500):
+    if not aux.is_point_inside_poly(field.ball.get_pos(), field.hull):
         inter_point = aux.get_line_intersection(
             field.ball_start_point,
             field.ball.get_pos(),
@@ -42,16 +41,22 @@ def defend_goal_ally(field: fld.Field, actions: list[Optional[Action]]) -> None:
 
         actions[defender] = Actions.GoToPoint(inter_point, (field.ball.get_pos() - field.allies[defender].get_pos()).arg())
     else:
-        for i in field.active_allies():
-            allies_pos.append(i.get_pos()) 
-        accepter = aux.find_nearest_point(field.allies[defender].get_pos(), allies_pos)
+        print(field.ball.get_pos())
+        a = [defender]
+        day_pas(field, actions, defender, fld.find_nearest_robot(field.ball.get_pos(), field.allies, a).r_id, 1600)
 
-        for i in field.active_allies():
-            if accepter == i.get_pos():
-                accepter_id = i.r_id
+    # actions[defender] = Actions.GoToPoint(field.ally_goal.center, (field.ball.get_pos()).arg())
 
-        actions[defender] = Actions.Kick(accepter, is_pass=True)
-        
-        kick_goal(field, actions, accepter_id)
-        # actions[defender] = Actions.GoToPoint(field.ally_goal.center, (field.ball.get_pos() - accepter).arg())
-       
+
+# in_place(field.ball.get_pos(), field.allies[defender].get_pos(), 500)
+
+
+def day_pas(field: fld.Field, actions: list[Optional[Action]], kicker: int, accepter: int, rastt: float) -> None:
+    if rastt == -1:
+        rastt = (field.allies[accepter].get_pos() - field.ball.get_pos()).mag()
+    
+    actions[accepter] = Actions.GoToPoint(
+        (((field.ball.get_pos() - field.allies[kicker].get_pos()).unity() * rastt) + field.ball.get_pos()),
+        (field.ball.get_pos() - field.allies[accepter].get_pos()).arg(),
+    )
+    actions[kicker] = Actions.Kick(field.allies[accepter].get_pos(), is_pass=True)
