@@ -43,7 +43,7 @@ def defend_goal_ally(field: fld.Field, actions: list[Optional[Action]]) -> None:
     else:
         print(field.ball.get_pos())
         a = [defender]
-        day_pas(field, actions, defender, fld.find_nearest_robot(field.ball.get_pos(), field.allies, a).r_id, 1600)
+        day_pas(field, actions, defender, fld.find_nearest_robot(field.ball.get_pos(), field.allies, a).r_id, 600)
 
     # actions[defender] = Actions.GoToPoint(field.ally_goal.center, (field.ball.get_pos()).arg())
 
@@ -54,9 +54,11 @@ def defend_goal_ally(field: fld.Field, actions: list[Optional[Action]]) -> None:
 def day_pas(field: fld.Field, actions: list[Optional[Action]], kicker: int, accepter: int, rastt: float) -> None:
     if rastt == -1:
         rastt = (field.allies[accepter].get_pos() - field.ball.get_pos()).mag()
-    
-    actions[accepter] = Actions.GoToPoint(
-        (((field.ball.get_pos() - field.allies[kicker].get_pos()).unity() * rastt) + field.ball.get_pos()),
-        (field.ball.get_pos() - field.allies[accepter].get_pos()).arg(),
-    )
-    actions[kicker] = Actions.Kick(field.allies[accepter].get_pos(), is_pass=True)
+    if aux.in_place(field.ball.get_pos(), field.allies[accepter].get_pos(), 500):
+        actions[accepter] = Actions.Kick(field.enemy_goal.center)
+    else:
+        if not aux.in_place(field.ball.get_pos(), field.allies[kicker].get_pos(), 1000):
+            accept_point = ((field.allies[accepter].get_pos() - field.ball.get_pos()).unity() * rastt) + field.ball.get_pos()
+
+        actions[accepter] = Actions.GoToPoint(accept_point, (field.ball.get_pos() - field.allies[accepter].get_pos()).arg())
+        actions[kicker] = Actions.Kick(accept_point, is_pass=True)
