@@ -28,7 +28,9 @@ def kick_goal(field: fld.Field, actions: list[Optional[Action]], kicker: int) ->
 def defend_goal_ally(field: fld.Field, actions: list[Optional[Action]]) -> None:
     defender = field.gk_id
 
-    if not aux.is_point_inside_poly(field.ball.get_pos(), field.hull):
+    if not aux.is_point_inside_poly(field.ball.get_pos(), field.ally_goal.hull) or (
+        aux.in_place(field.ball_start_point, field.ball.get_pos(), 50)
+    ):
         inter_point = aux.get_line_intersection(
             field.ball_start_point,
             field.ball.get_pos(),
@@ -50,14 +52,17 @@ def defend_goal_ally(field: fld.Field, actions: list[Optional[Action]]) -> None:
 
 # in_place(field.ball.get_pos(), field.allies[defender].get_pos(), 500)
 
+accept_point: Optional[aux.Point] = None
+
 
 def day_pas(field: fld.Field, actions: list[Optional[Action]], kicker: int, accepter: int, rastt: float) -> None:
+    global accept_point
     if rastt == -1:
         rastt = (field.allies[accepter].get_pos() - field.ball.get_pos()).mag()
-    if aux.in_place(field.ball.get_pos(), field.allies[accepter].get_pos(), 500):
+    if aux.in_place(field.ball.get_pos(), field.allies[accepter].get_pos(), 300):
         actions[accepter] = Actions.Kick(field.enemy_goal.center)
     else:
-        if not aux.in_place(field.ball.get_pos(), field.allies[kicker].get_pos(), 1000):
+        if accept_point is None or not aux.in_place(field.ball.get_pos(), field.allies[kicker].get_pos(), 1000):
             accept_point = ((field.allies[accepter].get_pos() - field.ball.get_pos()).unity() * rastt) + field.ball.get_pos()
 
         actions[accepter] = Actions.GoToPoint(accept_point, (field.ball.get_pos() - field.allies[accepter].get_pos()).arg())
