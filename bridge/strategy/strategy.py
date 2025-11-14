@@ -92,6 +92,6 @@ class Strategy:
             for i in range(len(actions)):
                 actions[i] = Actions.Stop()
             actions[field.gk_id] = Actions.GoToPoint(
-                field.ally_goal.center, (field.ball.get_pos() - field.allies[field.gk_id].get_pos()).arg()
+                field.ball.get_pos() - field.enemy_goal.center, (field.ball.get_pos() - field.allies[field.gk_id].get_pos()).arg()
             )
 
