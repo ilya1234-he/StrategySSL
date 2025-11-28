@@ -90,6 +90,7 @@ class SSLController(BaseProcessor):
         self.field.strategy_image.timer.end(time())
         if self.field.ally_color == const.COLOR:
             self.image_writer.write(self.field.strategy_image)
+            self.image_writer.write(self.field.trigers_vision_code)
         self.field.clear_images()
 
     @debugger

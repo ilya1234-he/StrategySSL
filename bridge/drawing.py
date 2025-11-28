@@ -16,6 +16,7 @@ class ImageTopic(Enum):
     STRATEGY = 0
     ROUTER = 1
     PATH_GENERATION = 2
+    STRATEGY_TRIGGERS_VISION = 3
 
     FIELD = 10
 

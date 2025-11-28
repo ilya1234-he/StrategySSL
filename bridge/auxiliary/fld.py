@@ -115,6 +115,7 @@ class Field:
         self.strategy_image = drawing.Image(drawing.ImageTopic.STRATEGY)
         self.router_image = drawing.Image(drawing.ImageTopic.ROUTER)
         self.path_image = drawing.Image(drawing.ImageTopic.PATH_GENERATION)
+        self.trigers_vision_code = drawing.Image(drawing.ImageTopic.STRATEGY_TRIGGERS_VISION)
 
         self.ally_color = color
         if self.ally_color == const.COLOR:

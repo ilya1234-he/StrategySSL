@@ -35,6 +35,7 @@ def is_ball_moving(field: fld.Field, ball_speed: float) -> bool:
 # Находится ли мяч на увеличенной территории союзных ворот
 def is_ball_in_zone(field: fld.Field) -> bool:
     expansion = 350
+    global ball_is_ready_for_kick
 
     # расширенная на переменную "expansion" территория союзных ворот
     reseiving_pas_bound = [
@@ -49,8 +50,12 @@ def is_ball_in_zone(field: fld.Field) -> bool:
         ),
         aux.Point(field.ally_goal.center_down.x, field.ally_goal.center_down.y - (field.ally_goal.eye_up.y * expansion)),
     ]
+
+    field.trigers_vision_code.draw_poly(reseiving_pas_bound, (0, 0, 200))
     if (aux.is_point_inside_poly(field.ball.get_pos(), reseiving_pas_bound)):
         print("ball in zone")
+    else:
+        ball_is_ready_for_kick = False
     return aux.is_point_inside_poly(field.ball.get_pos(), reseiving_pas_bound)
 
 
@@ -58,10 +63,9 @@ def is_ball_in_zone(field: fld.Field) -> bool:
 def defend_goal_ally(field: fld.Field, actions: list[Optional[Action]]) -> None:
     defender = field.gk_id
     ball_speed = field.ball.get_vel().mag()
+    global ball_is_ready_for_kick
 
-    if (not is_ball_in_zone(field) or is_ball_moving(field, ball_speed)) and (
-        not aux.in_place(field.ball.get_pos(), field.allies[defender].get_pos(), 100)
-    ):
+    if (not is_ball_in_zone(field) or is_ball_moving(field, ball_speed)) and not ball_is_ready_for_kick:
         # Встать на пути мяча
         inter_point = aux.get_line_intersection(
             field.ball_start_point,
@@ -78,17 +82,32 @@ def defend_goal_ally(field: fld.Field, actions: list[Optional[Action]]) -> None:
 
         actions[defender] = Actions.GoToPoint(inter_point, (field.ball.get_pos() - field.allies[defender].get_pos()).arg())
     else:
-        # Подать мяч ближайшему союзнику 
+        #  Проверка на то, есть ли вражеский робот на пути вратаря к союзнику. Если есть - этому союзнику мяч не будет подан
         #print(field.ball.get_pos())
         a = [defender]
-        day_pas(field, actions, defender, fld.find_nearest_robot(field.ball.get_pos(), field.allies, a).r_id, 600)
+        for i_ally_id in field.active_allies():
+            for j_enemy_id in field.active_enemies():
+                if aux.closest_point_on_line(
+                    field.allies[defender].get_pos(), 
+                    field.allies[i_ally_id.r_id].get_pos(), 
+                    field.enemies[j_enemy_id.r_id].get_pos(), "S"
+                ).mag() < 150:
+                    a.append(i_ally_id.r_id)
 
+        if len(a) != len(field.active_allies(True)):
+            # Подать мяч ближайшему союзнику 
+            ball_is_ready_for_kick = True
+            day_pas(field, actions, defender, fld.find_nearest_robot(field.ball.get_pos(), field.allies, a).r_id, 600)
+        else:
+            Throw_a_granade()
     # actions[defender] = Actions.GoToPoint(field.ally_goal.center, (field.ball.get_pos()).arg())
 
 
 # in_place(field.ball.get_pos(), field.allies[defender].get_pos(), 500)
 
 accept_point: Optional[aux.Point] = None
+
+ball_is_ready_for_kick: Optional[bool] = False
 
 
 # Алгоритм подачи паса.              kicker - подающий,     accepter - принимающий.
