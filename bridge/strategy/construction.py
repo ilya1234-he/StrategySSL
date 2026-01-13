@@ -51,7 +51,7 @@ def is_ball_in_zone(field: fld.Field) -> bool:
         aux.Point(field.ally_goal.center_down.x, field.ally_goal.center_down.y - (field.ally_goal.eye_up.y * expansion)),
     ]
 
-    #field.trigers_vision_code.draw_poly(reseiving_pas_bound, (0, 0, 200))
+    # field.trigers_vision_code.draw_poly(reseiving_pas_bound, (0, 0, 200))
 
     field.trigers_vision_code.clear()
     field.trigers_vision_code.draw_line(reseiving_pas_bound[0], reseiving_pas_bound[1], (0, 150, 0))
@@ -64,8 +64,35 @@ def is_ball_in_zone(field: fld.Field) -> bool:
         ball_is_ready_for_kick = False
     return aux.is_point_inside_poly(field.ball.get_pos(), reseiving_pas_bound)
 
+
+# выводит вектор заданной длины с помощью заданного угла
+def ang_plus_len_to_vector(ang_in: float, len_in: float) -> aux.Point:
+    x_out = math.cos(ang_in) * len_in
+    y_out = math.sin(ang_in) * len_in
+    return aux.Point(x_out, y_out)
+
+
+# проверка, находится ли мяч близко к сопернику
+def enemy_have_a_ball(field: fld.Field) -> bool:
+    rast_to_enemy_from_ball = 350
+    for i in field.active_enemies():
+        if (field.ball.get_pos() - field.enemies[i.r_id].get_pos()).mag() < rast_to_enemy_from_ball:
+            field.trigers_vision_code.draw_circle(field.ball.get_pos(), size_in_mms=rast_to_enemy_from_ball)
+            return True
+    return False
+
+
 # Алгоритм перехвата мяча у врага. Робот встанет между ним и его союзником, но только если между ними достаточно места
-def gk_balls_interception(field: fld.Field, actions: list[Optional[Action]]) -> None:
+def gk_balls_interception(field: fld.Field, actions: list[Optional[Action]], target_id: int) -> None:
+    interceptor_id = field.gk_id + 1
+    atacker_id = field.gk_id + 2
+    if enemy_have_a_ball(field):
+        actions[interceptor_id] = Actions.GoToPoint(
+            ang_plus_len_to_vector(field.enemies[target_id].get_angle(), 350),
+            (field.ball.get_pos() - field.allies[interceptor_id].get_pos()).mag()
+        )
+    else:
+        day_pas(field, actions, interceptor_id, atacker_id, 600)
 
 
 # Алгоритм защиты ворот вратарём(defender) и 1 ближайшим его союзником
@@ -92,7 +119,7 @@ def defend_goal_ally(field: fld.Field, actions: list[Optional[Action]]) -> None:
         actions[defender] = Actions.GoToPoint(inter_point, (field.ball.get_pos() - field.allies[defender].get_pos()).arg())
     else:
         #  Проверка на то, есть ли вражеский робот на пути вратаря к союзнику. Если есть - этому союзнику мяч не будет подан
-        #print(field.ball.get_pos())
+        # print(field.ball.get_pos())
         a = [defender]
         for i_ally_id in field.active_allies():
             for j_enemy_id in field.active_enemies():
