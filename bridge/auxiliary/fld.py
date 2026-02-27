@@ -196,6 +196,7 @@ class Field:
         self.strategy_image.clear()
         self.router_image.clear()
         self.path_image.clear()
+        self.trigers_vision_code.clear()
 
     def active_allies(self, include_gk: bool = False) -> list[rbt.Robot]:
         """return allies on field"""

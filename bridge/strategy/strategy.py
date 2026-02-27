@@ -84,11 +84,13 @@ class Strategy:
         """
         
 
-        if aux.in_place(field.ball.get_pos(), field.ally_goal.center, 3200):
+        if aux.in_place(field.ball.get_pos(), field.enemies[1].get_pos(), 320):
             # construction.day_pas(field, actions, field.gk_id, field.allies[1].r_id, 1500)
-
-            construction.defend_goal_ally(field, actions)
+            construction.gk_balls_interception(field, actions, 1, 2, 3)
+            #construction.defend_goal_ally(field, actions)
         else:
+            field.trigers_vision_code.clear()
+            field.trigers_vision_code.draw_circle(aux.Point(0,0),size_in_mms=0)
             for i in range(len(actions)):
                 actions[i] = Actions.Stop()
             actions[field.gk_id] = Actions.GoToPoint(
